@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --gray-light: #e2e8f0;
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #fef2f2 100%);
+            color: var(--dark);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 40px 35px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bg-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-light), transparent);
+            opacity: 0.1;
+        }
+
+        .shape-1 {
+            width: 200px;
+            height: 200px;
+            top: -100px;
+            right: -100px;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape-2 {
+            width: 150px;
+            height: 150px;
+            bottom: -75px;
+            left: -75px;
+            animation: float 25s infinite ease-in-out reverse;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-20px) rotate(120deg);
+            }
+            66% {
+                transform: translateY(20px) rotate(240deg);
+            }
+        }
+
+        .header {
+            margin-bottom: 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .icon-container {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .icon-container i {
+            font-size: 36px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--dark);
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 16px;
+            color: var(--gray);
+            line-height: 1.5;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        form {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+            text-align: left;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label i {
+            color: var(--primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 18px 20px;
+            border: 2px solid var(--gray-light);
+            border-radius: 14px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            background-color: white;
+            color: var(--dark);
+            resize: vertical;
+            min-height: 140px;
+            max-height: 250px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-control:hover {
+            border-color: #c7d2fe;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s;
+        }
+
+        .btn:hover::after {
+            left: 100%;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn:disabled:hover::after {
+            left: -100%;
+        }
+
+        .loading {
+            display: none;
+            margin: 24px 0;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(79, 70, 229, 0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: var(--gray);
+            font-size: 15px;
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 14px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 24px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            overflow: hidden;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result.spam {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+
+        .result.ham {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .result h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .result p {
+            font-size: 15px;
+            font-weight: normal;
+            color: var(--gray);
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        .footer {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--gray-light);
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer p {
+            font-size: 14px;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+                align-items: flex-start;
+                min-height: 100vh;
+                height: auto;
+            }
+
+            .container {
+                padding: 32px 24px;
+                margin: 20px 0;
+                max-width: 100%;
+                height: auto;
+                min-height: auto;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .header p {
+                font-size: 15px;
+            }
+
+            .icon-container {
+                width: 70px;
+                height: 70px;
+            }
+
+            .icon-container i {
+                font-size: 30px;
+            }
+
+            .form-control {
+                padding: 16px;
+                font-size: 15px;
+                min-height: 120px;
+            }
+
+            .btn {
+                padding: 16px;
+                font-size: 16px;
+            }
+
+            .result {
+                padding: 20px;
+                font-size: 16px;
+            }
+
+            .result h2 {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 28px 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .header p {
+                font-size: 14px;
+            }
+
+            .form-control {
+                min-height: 100px;
+            }
+        }
+
+        @media (max-height: 700px) and (max-width: 480px) {
+            body {
+                align-items: flex-start;
+                padding-top: 10px;
+            }
+            
+            .container {
+                padding: 20px 18px;
+                margin-top: 0;
+            }
+            
+            .header {
+                margin-bottom: 20px;
+            }
+            
+            .icon-container {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 16px;
+            }
+            
+            .icon-container i {
+                font-size: 24px;
+            }
+            
+            .form-group {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Background shapes -->
+        <div class="bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="icon-container">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1>Spam Detection</h1>
+            <p>Enter your message below to check if it is spam or not.</p>
+        </div>
+
+        <!-- Form -->
+        <form method="post" action="{% url 'home' %}" id="spamForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="id_text">
+                    <i class="fas fa-comment-alt"></i> Message:
+                </label>
+                {{ form.text }}
+                <div id="errorMessage" class="error-message" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Please enter a message to analyze.</span>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn" id="submitBtn">
+                <i class="fas fa-search"></i> Check for Spam
+            </button>
+            
+            <!-- Loading animation -->
+            <div class="loading" id="loading">
+                <div class="loader"></div>
+                <p>Analyzing message content with AI model...</p>
+            </div>
+        </form>
+
+        <!-- Result area -->
+        {% if submitted and result %}
+        <div class="result {{ result|lower }}">
+            <h2>
+                <i class="fas {% if result == 'Spam' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %}"></i>
+                {% if result == 'Spam' %}Spam Detected!{% else %}Legitimate Message{% endif %}
+            </h2>
+            <p style="margin-top: 8px; font-weight: 600;">
+                The message is classified as: <strong>{{ result }}</strong>
+            </p>
+            <p style="margin-top: 12px; font-size: 14px;">
+                {% if result == 'Spam' %}
+                <i class="fas fa-info-circle"></i> This message appears to be spam. Be cautious with links and personal information.
+                {% else %}
+                <i class="fas fa-check-circle"></i> This message appears to be legitimate and safe.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                <i class="fas fa-lock"></i>
+                Powered by Django & Naive Bayes
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-resize textarea
+        const textarea = document.getElementById('id_text');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 250) + 'px';
+            });
+            
+            // Set initial height
+            setTimeout(() => {
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.min(textarea.scrollHeight, 250) + 'px';
+            }, 100);
+        }
+
+        // Form validation and submission handling
+        document.getElementById('spamForm').addEventListener('submit', function(e) {
+            const messageInput = document.getElementById('id_text');
+            const errorMessage = document.getElementById('errorMessage');
+            const loading = document.getElementById('loading');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Clear any previous error
+            errorMessage.style.display = 'none';
+            
+            // Check if message is empty
+            if (!messageInput.value.trim()) {
+                e.preventDefault();
+                errorMessage.style.display = 'flex';
+                messageInput.focus();
+                messageInput.style.borderColor = 'var(--danger)';
+                
+                // Reset border color after 3 seconds
+                setTimeout(() => {
+                    if (messageInput.style.borderColor === 'var(--danger)') {
+                        messageInput.style.borderColor = '';
+                    }
+                }, 3000);
+                return;
+            }
+            
+            // If form is valid, show loading
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+            
+            // Reset after 10 seconds in case something goes wrong
+            setTimeout(() => {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }, 10000);
+        });
+
+        // Add focus animation to textarea
+        if (textarea) {
+            textarea.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            
+            textarea.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        }
+        
+        // Clear error when user starts typing
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                const errorMessage = document.getElementById('errorMessage');
+                if (errorMessage.style.display === 'flex') {
+                    errorMessage.style.display = 'none';
+                    this.style.borderColor = '';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
